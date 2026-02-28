@@ -5,6 +5,7 @@ import { DbService } from './db.service';
 
 @Module({
     providers: [OrganizationResolver, OrganizationService, DbService],
+    exports: [OrganizationService],
 })
 export class OrganizationModule {
 }

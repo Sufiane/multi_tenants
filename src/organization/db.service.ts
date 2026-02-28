@@ -17,4 +17,10 @@ export class DbService {
     findAll(): Promise<Organizations[]> {
         return this.prismaService.organizations.findMany();
     }
+
+    findOneByUuid(uuid: string): Promise<Organizations | null> {
+        return this.prismaService.organizations.findUnique({
+            where: { uuid },
+        });
+    }
 }

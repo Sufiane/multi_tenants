@@ -16,4 +16,8 @@ export class OrganizationService {
     async findAll(): Promise<Organization[]> {
         return this.dbService.findAll();
     }
+
+    async getByUuid(uuid: string): Promise<Organization | null> {
+        return this.dbService.findOneByUuid(uuid)
+    }
 }
