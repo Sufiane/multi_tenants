@@ -11,8 +11,8 @@ export class OrganizationResolver {
     @Mutation(() => Organization)
     async createOrganization(
         @Args('createOrganizationInput') createOrganizationInput: CreateOrganizationInput,
-    ): Promise<void> {
-        await this.organizationService.create(createOrganizationInput);
+    ): Promise<Organization> {
+        return this.organizationService.create(createOrganizationInput);
     }
 
     @Query(() => [Organization], { name: 'organizations' })

@@ -9,8 +9,8 @@ export class OrganizationService {
     constructor(private readonly dbService: DbService) {
     }
 
-    async create(createOrganizationInput: CreateOrganizationInput): Promise<void> {
-        await this.dbService.create(createOrganizationInput);
+    async create(createOrganizationInput: CreateOrganizationInput): Promise<Organization> {
+        return this.dbService.create(createOrganizationInput);
     }
 
     async findAll(): Promise<Organization[]> {

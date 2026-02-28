@@ -8,10 +8,10 @@ export class DbService {
     constructor(private readonly prismaService: PrismaService) {
     }
 
-    async create(payload: { name: string }): Promise<void> {
+    async create(payload: { name: string }): Promise<Organizations> {
         const uuid = uuidV4();
 
-        await this.prismaService.organizations.create({ data: { ...payload, uuid } });
+        return this.prismaService.organizations.create({ data: { ...payload, uuid } });
     }
 
     findAll(): Promise<Organizations[]> {
