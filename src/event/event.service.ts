@@ -14,10 +14,7 @@ import { Organization } from '../organization/object-type/organization.type';
 import { DeleteEventInput } from './dto/delete-event.input';
 
 export type ValidatedEvent = UpdateEventInput &
-  (
-    | Required<Pick<UpdateEventInput, 'name'>>
-    | Required<Pick<UpdateEventInput, 'capacity'>>
-  );
+  (Required<Pick<UpdateEventInput, 'name'>> | Required<Pick<UpdateEventInput, 'capacity'>>);
 
 @Injectable()
 export class EventService {
@@ -37,9 +34,7 @@ export class EventService {
   }
 
   async create(payload: CreateEventInput): Promise<Event> {
-    const organization = await this.getOrganizationByUuid(
-      payload.organizationUuid,
-    );
+    const organization = await this.getOrganizationByUuid(payload.organizationUuid);
 
     return this.dbService.create({
       organizationId: organization.id,
@@ -53,13 +48,8 @@ export class EventService {
     return this.dbService.findAll(organization.id);
   }
 
-  async findOne(payload: {
-    id: string;
-    organizationUuid: string;
-  }): Promise<Event> {
-    const organization = await this.getOrganizationByUuid(
-      payload.organizationUuid,
-    );
+  async findOne(payload: { id: string; organizationUuid: string }): Promise<Event> {
+    const organization = await this.getOrganizationByUuid(payload.organizationUuid);
 
     const event = await this.dbService.findOne(payload.id);
 
@@ -72,22 +62,16 @@ export class EventService {
     return event;
   }
 
-  private validateUpdatePayload(
-    payload: UpdateEventInput,
-  ): asserts payload is ValidatedEvent {
+  private validateUpdatePayload(payload: UpdateEventInput): asserts payload is ValidatedEvent {
     if (payload.name === undefined && payload.capacity === undefined) {
-      throw new BadRequestException(
-        'at_least_one_field_required_between_name_and_capacity',
-      );
+      throw new BadRequestException('at_least_one_field_required_between_name_and_capacity');
     }
   }
 
   async update(payload: UpdateEventInput): Promise<Event> {
     this.validateUpdatePayload(payload);
 
-    const organization = await this.getOrganizationByUuid(
-      payload.organizationUuid,
-    );
+    const organization = await this.getOrganizationByUuid(payload.organizationUuid);
 
     const event = await this.dbService.findOne(payload.id);
 
@@ -105,9 +89,7 @@ export class EventService {
   }
 
   async delete(payload: DeleteEventInput): Promise<Event> {
-    const organization = await this.getOrganizationByUuid(
-      payload.organizationUuid,
-    );
+    const organization = await this.getOrganizationByUuid(payload.organizationUuid);
 
     const event = await this.dbService.findOne(payload.id);
 

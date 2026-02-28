@@ -97,10 +97,7 @@ export class DbService {
     }
   }
 
-  async delete(payload: {
-    id: string;
-    organizationId: string;
-  }): Promise<Event> {
+  async delete(payload: { id: string; organizationId: string }): Promise<Event> {
     try {
       const dbResult = await this.prismaService.events.delete({
         where: { id: payload.id, organizationId: payload.organizationId },

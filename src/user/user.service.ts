@@ -7,26 +7,21 @@ import { pick } from 'radash';
 
 @Injectable()
 export class UserService {
+  constructor(
+    private readonly dbService: DbService,
+    private readonly organizationService: OrganizationService,
+  ) {}
 
-    constructor(
-        private readonly dbService: DbService,
-        private readonly organizationService: OrganizationService,
-    ) {
+  async create(payload: CreateUserInput): Promise<User> {
+    const organization = await this.organizationService.getByUuid(payload.organizationUuid);
+
+    if (!organization) {
+      throw new BadRequestException('organization_not_found');
     }
 
-
-    async create(payload: CreateUserInput): Promise<User> {
-        const organization = await this.organizationService.getByUuid(payload.organizationUuid);
-
-        if (!organization) {
-            throw new BadRequestException('organization_not_found');
-        }
-
-        return this.dbService.create({
-            organizationId: organization.id, ...pick(
-                payload,
-                ['name', 'email'],
-            ),
-        });
-    }
+    return this.dbService.create({
+      organizationId: organization.id,
+      ...pick(payload, ['name', 'email']),
+    });
+  }
 }

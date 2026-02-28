@@ -7,19 +7,18 @@ import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 
 @Module({
-    imports: [
-        GraphQLModule.forRoot<ApolloDriverConfig>({
-            driver: ApolloDriver,
-            playground: false,
-            graphiql: false,
-            autoSchemaFile: true,
-            sortSchema: true,
-        }),
-        PrismaModule,
-        OrganizationModule,
-        UserModule,
-        EventModule,
-    ],
+  imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      playground: false,
+      graphiql: false,
+      autoSchemaFile: true,
+      sortSchema: true,
+    }),
+    PrismaModule,
+    OrganizationModule,
+    UserModule,
+    EventModule,
+  ],
 })
-export class AppModule {
-}
+export class AppModule {}

@@ -5,8 +5,7 @@ import { UserResolver } from './user.resolver';
 import { OrganizationModule } from '../organization/organization.module';
 
 @Module({
-    imports: [OrganizationModule],
-    providers: [UserService, DbService, UserResolver],
+  imports: [OrganizationModule],
+  providers: [UserService, DbService, UserResolver],
 })
-export class UserModule {
-}
+export class UserModule {}

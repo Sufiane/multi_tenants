@@ -4,8 +4,7 @@ import { OrganizationResolver } from './organization.resolver';
 import { DbService } from './db.service';
 
 @Module({
-    providers: [OrganizationResolver, OrganizationService, DbService],
-    exports: [OrganizationService],
+  providers: [OrganizationResolver, OrganizationService, DbService],
+  exports: [OrganizationService],
 })
-export class OrganizationModule {
-}
+export class OrganizationModule {}

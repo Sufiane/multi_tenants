@@ -10,30 +10,22 @@ export class EventResolver {
   constructor(private readonly eventService: EventService) {}
 
   @Mutation(() => Event)
-  async createEvent(
-    @Args('createEventInput') createEventInput: CreateEventInput,
-  ): Promise<Event> {
+  async createEvent(@Args('createEventInput') createEventInput: CreateEventInput): Promise<Event> {
     return this.eventService.create(createEventInput);
   }
 
   @Mutation(() => Event)
-  async updateEvent(
-    @Args('updateEventInput') updateEventInput: UpdateEventInput,
-  ): Promise<Event> {
+  async updateEvent(@Args('updateEventInput') updateEventInput: UpdateEventInput): Promise<Event> {
     return this.eventService.update(updateEventInput);
   }
 
   @Mutation(() => Event)
-  async deleteEvent(
-    @Args('deleteEventInput') deleteEventInput: DeleteEventInput,
-  ): Promise<Event> {
+  async deleteEvent(@Args('deleteEventInput') deleteEventInput: DeleteEventInput): Promise<Event> {
     return this.eventService.delete(deleteEventInput);
   }
 
   @Query(() => [Event])
-  async events(
-    @Args('organizationUuid') organizationUuid: string,
-  ): Promise<Event[]> {
+  async events(@Args('organizationUuid') organizationUuid: string): Promise<Event[]> {
     return this.eventService.findAll(organizationUuid);
   }
 

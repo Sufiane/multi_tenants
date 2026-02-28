@@ -6,18 +6,17 @@ import { Organization } from './object-type/organization.type';
 
 @Injectable()
 export class OrganizationService {
-    constructor(private readonly dbService: DbService) {
-    }
+  constructor(private readonly dbService: DbService) {}
 
-    async create(createOrganizationInput: CreateOrganizationInput): Promise<Organization> {
-        return this.dbService.create(createOrganizationInput);
-    }
+  async create(createOrganizationInput: CreateOrganizationInput): Promise<Organization> {
+    return this.dbService.create(createOrganizationInput);
+  }
 
-    async findAll(): Promise<Organization[]> {
-        return this.dbService.findAll();
-    }
+  async findAll(): Promise<Organization[]> {
+    return this.dbService.findAll();
+  }
 
-    async getByUuid(uuid: string): Promise<Organization | null> {
-        return this.dbService.findOneByUuid(uuid)
-    }
+  async getByUuid(uuid: string): Promise<Organization | null> {
+    return this.dbService.findOneByUuid(uuid);
+  }
 }

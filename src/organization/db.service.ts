@@ -5,22 +5,21 @@ import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class DbService {
-    constructor(private readonly prismaService: PrismaService) {
-    }
+  constructor(private readonly prismaService: PrismaService) {}
 
-    async create(payload: { name: string }): Promise<Organizations> {
-        const uuid = uuidV4();
+  async create(payload: { name: string }): Promise<Organizations> {
+    const uuid = uuidV4();
 
-        return this.prismaService.organizations.create({ data: { ...payload, uuid } });
-    }
+    return this.prismaService.organizations.create({ data: { ...payload, uuid } });
+  }
 
-    findAll(): Promise<Organizations[]> {
-        return this.prismaService.organizations.findMany();
-    }
+  findAll(): Promise<Organizations[]> {
+    return this.prismaService.organizations.findMany();
+  }
 
-    findOneByUuid(uuid: string): Promise<Organizations | null> {
-        return this.prismaService.organizations.findUnique({
-            where: { uuid },
-        });
-    }
+  findOneByUuid(uuid: string): Promise<Organizations | null> {
+    return this.prismaService.organizations.findUnique({
+      where: { uuid },
+    });
+  }
 }
