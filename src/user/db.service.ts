@@ -4,8 +4,7 @@ import {
     InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-import { CONSTRAINT_FAILED } from '../prisma/errors';
+import { isConstraintFailedError } from '../prisma/errors';
 import { User } from './object-type/user.type';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class DbService {
 
             return dbResult;
         } catch (e) {
-            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === CONSTRAINT_FAILED) {
+            if (isConstraintFailedError(e)) {
                 const target = e.meta?.target as string[] | undefined;
 
                 if (target?.includes('email')) {
