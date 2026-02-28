@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Organizations {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  uuid String @unique()
+
+  users  Users[]
+  events Events[]
+}
+
+model Users {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  // for the sake of simplicity user can connect w/ only their email
+  email String @unique
+
+  organizationId String        @db.ObjectId
+  organization   Organizations @relation(fields: [organizationId], references: [id])
+
+  registrations Registrations[]
+
+  @@index([organizationId])
+}
+
+model Events {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  capacity Int
+
+  organizationId String          @db.ObjectId
+  organization   Organizations   @relation(fields: [organizationId], references: [id])
+  registrations  Registrations[]
+
+  @@index([organizationId])
+}
+
+model Registrations {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+
+  userId  String @db.ObjectId
+  user    Users  @relation(fields: [userId], references: [id])
+  eventId String @db.ObjectId
+  event   Events @relation(fields: [eventId], references: [id])
+
+  organizationId String @db.ObjectId
+
+  @@unique([userId, eventId])
+  @@index([organizationId])
+}
