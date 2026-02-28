@@ -12,6 +12,9 @@ import { OrganizationService } from '../organization/organization.service';
 import { pick } from 'radash';
 import { Organization } from '../organization/object-type/organization.type';
 import { DeleteEventInput } from './dto/delete-event.input';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS } from '../cache/cache_keys';
+import { minutesToSeconds } from 'date-fns';
 
 export type ValidatedEvent = UpdateEventInput &
   (Required<Pick<UpdateEventInput, 'name'>> | Required<Pick<UpdateEventInput, 'capacity'>>);
@@ -21,14 +24,24 @@ export class EventService {
   constructor(
     private readonly dbService: DbService,
     private readonly organizationService: OrganizationService,
+    private readonly cacheService: CacheService,
   ) {}
 
   private async getOrganizationByUuid(uuid: string): Promise<Organization> {
+    const cacheKey = CACHE_KEYS.organization(uuid);
+    const cacheData = await this.cacheService.get<Organization>(cacheKey);
+
+    if (cacheData) {
+      return cacheData;
+    }
+
     const organization = await this.organizationService.getByUuid(uuid);
 
     if (!organization) {
       throw new BadRequestException('organization_not_found');
     }
+
+    await this.cacheService.set(cacheKey, organization, minutesToSeconds(10));
 
     return organization;
   }
