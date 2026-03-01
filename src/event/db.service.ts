@@ -39,12 +39,12 @@ export class DbService {
     }
   }
 
-  async findAll(organizationId?: string): Promise<EventWithOrg[]> {
+  async findAll(organizationId: string): Promise<EventWithOrg[]> {
     try {
-      const where = organizationId ? { organizationId } : {};
-
       const dbResults = await this.prismaService.events.findMany({
-        where,
+        where: {
+          organizationId,
+        },
         include: {
           organization: true,
         },
