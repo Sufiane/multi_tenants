@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { OrganizationModule } from './organization/organization.module';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
+import { EventRegistrationsModule } from './event-registrations/event-registrations.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
@@ -21,6 +22,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     OrganizationModule,
     UserModule,
     EventModule,
+    EventRegistrationsModule,
   ],
 })
 export class AppModule {}
