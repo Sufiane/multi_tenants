@@ -86,9 +86,12 @@ export class EventService {
   async update(payload: UpdateEventInput): Promise<Event> {
     this.validateUpdatePayload(payload);
 
-    const organization = await this.getOrganizationByUuid(payload.organizationUuid);
-
-    const event = await this.dbService.findOne(payload.id);
+    // optimistic perf improvement:
+    // we assume we will have a valid organizationUuid most of the time
+    const [organization, event] = await Promise.all([
+      this.getOrganizationByUuid(payload.organizationUuid),
+      this.dbService.findOne(payload.id),
+    ]);
 
     if (!event) {
       throw new NotFoundException('event_not_found');
@@ -96,10 +99,23 @@ export class EventService {
 
     this.checkOwnership(event, organization);
 
+    let remainingCapacity: number | undefined;
+
+    if (payload.capacity !== undefined) {
+      const nextRemainingCapacity = event.remainingCapacity + (payload.capacity - event.capacity);
+
+      if (nextRemainingCapacity < 0) {
+        throw new BadRequestException('capacity_lower_than_registrations');
+      }
+
+      remainingCapacity = nextRemainingCapacity;
+    }
+
     return this.dbService.update({
       ...pick(payload, ['name', 'capacity']),
       id: event.id,
       organizationId: organization.id,
+      remainingCapacity,
     });
   }
 

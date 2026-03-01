@@ -38,10 +38,11 @@ model Users {
 }
 
 model Events {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  capacity Int
-  uuid     String @unique()
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  capacity          Int
+  remainingCapacity Int    @default(0)
+  uuid              String @unique()
 
   organizationId String          @db.ObjectId
   organization   Organizations   @relation(fields: [organizationId], references: [id])

@@ -35,28 +35,64 @@ export class DbService {
     }
   }
 
-  async create(payload: {
-    userId: string;
-    eventId: string;
+  async createWithCapacity(payload: {
+    userUuid: string;
+    eventUuid: string;
     organizationId: string;
   }): Promise<EventRegistration> {
     try {
-      return await this.prismaService.registrations.create({
-        data: payload,
-        include: {
-          user: {
-            include: {
-              organization: true,
+      return await this.prismaService.$transaction(async tx => {
+        const updated = await tx.events.updateMany({
+          where: {
+            uuid: payload.eventUuid,
+            remainingCapacity: {
+              gt: 0,
             },
           },
-          event: {
-            include: {
-              organization: true,
+          data: {
+            remainingCapacity: {
+              decrement: 1,
             },
           },
-        },
+        });
+
+        if (updated.count === 0) {
+          throw new BadRequestException('event_full');
+        }
+
+        return await tx.registrations.create({
+          data: {
+            organizationId: payload.organizationId,
+            user: {
+              connect: {
+                uuid: payload.userUuid,
+              },
+            },
+            event: {
+              connect: {
+                uuid: payload.eventUuid,
+              },
+            },
+          },
+          include: {
+            user: {
+              include: {
+                organization: true,
+              },
+            },
+            event: {
+              include: {
+                organization: true,
+              },
+            },
+          },
+        });
       });
     } catch (e) {
+      if (e instanceof BadRequestException) {
+        throw e;
+      }
+
       if (isConstraintFailedError(e)) {
         throw new BadRequestException('registration_already_exists');
       }

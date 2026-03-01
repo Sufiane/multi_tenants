@@ -23,7 +23,7 @@ export class DbService {
   }): Promise<Event> {
     try {
       const dbResult = await this.prismaService.events.create({
-        data: { ...payload, uuid: uuidV4() },
+        data: { ...payload, uuid: uuidV4(), remainingCapacity: payload.capacity },
         include: {
           organization: true,
         },
@@ -75,12 +75,13 @@ export class DbService {
     payload: {
       id: string;
       organizationId: string;
+      remainingCapacity?: number;
     } & Pick<ValidatedEvent, 'name' | 'capacity'>,
   ): Promise<Event> {
     try {
       const dbResult = await this.prismaService.events.update({
         where: { id: payload.id, organizationId: payload.organizationId },
-        data: { ...pick(payload, ['name', 'capacity']) },
+        data: { ...pick(payload, ['name', 'capacity', 'remainingCapacity']) },
         include: {
           organization: true,
         },

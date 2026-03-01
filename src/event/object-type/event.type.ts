@@ -12,6 +12,9 @@ export class Event {
   @Field(() => Int)
   capacity: number;
 
+  @Field(() => Int)
+  remainingCapacity: number;
+
   @Field()
   organization: Organization;
 }

@@ -41,9 +41,9 @@ export class EventRegistrationsService {
 
     this.ensureSameOrganization(user, event, organization);
 
-    return this.dbService.create({
-      userId: payload.userUuid,
-      eventId: payload.eventUuid,
+    return this.dbService.createWithCapacity({
+      userUuid: payload.userUuid,
+      eventUuid: payload.eventUuid,
       organizationId: organization.id,
     });
   }
