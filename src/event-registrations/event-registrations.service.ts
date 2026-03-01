@@ -20,7 +20,7 @@ export class EventRegistrationsService {
   ) {}
 
   async create(payload: CreateEventRegistrationInput): Promise<EventRegistration> {
-    const organization = await this.organizationService.getByUuid(payload.organizationUuid);
+    const organization = await this.organizationService.getByUuid(payload.organizationUuid, false);
 
     if (!organization) {
       throw new BadRequestException('organization_not_found');

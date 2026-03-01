@@ -35,8 +35,6 @@ export class DbService {
         throw new BadRequestException(e);
       }
 
-      console.log('error', e);
-
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -53,8 +51,7 @@ export class DbService {
       });
 
       return dbResults;
-    } catch (e) {
-      console.log('error', e);
+    } catch {
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -69,7 +66,7 @@ export class DbService {
       });
 
       return dbResult;
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException('internal_error');
     }
   }

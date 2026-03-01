@@ -17,7 +17,7 @@ export class DbService {
           organization: true,
         },
       });
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -30,7 +30,7 @@ export class DbService {
           organization: true,
         },
       });
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException('internal_error');
     }
   }

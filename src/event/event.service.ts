@@ -15,7 +15,7 @@ import { DeleteEventInput } from './dto/delete-event.input';
 import { CacheService } from '../cache/cache.service';
 import { CACHE_KEYS } from '../cache/cache_keys';
 import { minutesToSeconds } from 'date-fns';
-import { Events, Organizations } from '@prisma/client';
+import { Organizations } from '@prisma/client';
 import { EventWithOrg } from './types/event-with-org.type';
 
 export type ValidatedEvent = UpdateEventInput &

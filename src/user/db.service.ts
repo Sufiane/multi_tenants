@@ -20,6 +20,7 @@ export class DbService {
       return dbResult;
     } catch (e) {
       if (isConstraintFailedError(e)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const target = e.meta?.target as string[] | undefined;
 
         if (target?.includes('email')) {
