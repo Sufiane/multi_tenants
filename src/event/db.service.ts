@@ -1,7 +1,8 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,6 +15,8 @@ import { EventWithOrg } from './types/event-with-org.type';
 
 @Injectable()
 export class DbService {
+  private readonly logger = new Logger(`Event-${DbService.name}`);
+
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(payload: {
@@ -31,9 +34,14 @@ export class DbService {
 
       return dbResult;
     } catch (e) {
+      // could use a retry mechanism here.
       if (isConstraintFailedError(e)) {
-        throw new BadRequestException(e);
+        throw new ConflictException('could_not_create_event');
       }
+
+      this.logger.error('Error creating event', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+      });
 
       throw new InternalServerErrorException('internal_error');
     }
@@ -51,7 +59,12 @@ export class DbService {
       });
 
       return dbResults;
-    } catch {
+    } catch (e) {
+      this.logger.error('Error getting all events', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        organizationId,
+      });
+
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -66,7 +79,12 @@ export class DbService {
       });
 
       return dbResult;
-    } catch {
+    } catch (e) {
+      this.logger.error('Error finding one event', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        eventId: id,
+      });
+
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -93,6 +111,11 @@ export class DbService {
         throw new NotFoundException('event_not_found');
       }
 
+      this.logger.error('Error updating event', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        payload,
+      });
+
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -111,6 +134,11 @@ export class DbService {
       if (isNotFoundError(e)) {
         throw new NotFoundException('event_not_found');
       }
+
+      this.logger.error('Error deleting event', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        payload,
+      });
 
       throw new InternalServerErrorException('internal_error');
     }

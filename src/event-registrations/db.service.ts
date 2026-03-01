@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { isConstraintFailedError } from '../prisma/errors';
 import { EventRegistration } from './object-type/event-registration.type';
@@ -7,6 +12,8 @@ import { Event } from '../event/object-type/event.type';
 
 @Injectable()
 export class DbService {
+  private readonly logger = new Logger(`EventRegistration-${DbService.name}`);
+
   constructor(private readonly prismaService: PrismaService) {}
 
   async findUserByUuid(uuid: string): Promise<User | null> {
@@ -17,7 +24,12 @@ export class DbService {
           organization: true,
         },
       });
-    } catch {
+    } catch (e) {
+      this.logger.error('Error finding user', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        userUuid: uuid,
+      });
+
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -30,7 +42,12 @@ export class DbService {
           organization: true,
         },
       });
-    } catch {
+    } catch (e) {
+      this.logger.error('Error finding event-registration', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        eventUuid: uuid,
+      });
+
       throw new InternalServerErrorException('internal_error');
     }
   }
@@ -96,6 +113,11 @@ export class DbService {
       if (isConstraintFailedError(e)) {
         throw new BadRequestException('registration_already_exists');
       }
+
+      this.logger.error('Error creating event-registration', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        payload,
+      });
 
       throw new InternalServerErrorException('internal_error');
     }

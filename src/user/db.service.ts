@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { isConstraintFailedError } from '../prisma/errors';
 import { User } from './object-type/user.type';
@@ -6,6 +11,8 @@ import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class DbService {
+  private readonly logger = new Logger(`User-${DbService.name}`);
+
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(payload: { name: string; email: string; organizationId: string }): Promise<User> {
@@ -28,7 +35,10 @@ export class DbService {
         }
       }
 
-      console.log('error', e);
+      this.logger.error('Error creating user', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        payload,
+      });
 
       throw new InternalServerErrorException('internal_error');
     }
