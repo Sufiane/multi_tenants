@@ -26,7 +26,8 @@ model Users {
   id    String @id @default(auto()) @map("_id") @db.ObjectId
   name  String
   // for the sake of simplicity user can connect w/ only their email
-  email String @unique
+  email String @unique()
+  uuid  String @unique()
 
   organizationId String        @db.ObjectId
   organization   Organizations @relation(fields: [organizationId], references: [id])
@@ -40,6 +41,7 @@ model Events {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
   capacity Int
+  uuid     String @unique()
 
   organizationId String          @db.ObjectId
   organization   Organizations   @relation(fields: [organizationId], references: [id])
