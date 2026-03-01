@@ -9,6 +9,8 @@ import { isConstraintFailedError, isNotFoundError } from '../prisma/errors';
 import { Event } from './object-type/event.type';
 import { pick } from 'radash';
 import { ValidatedEvent } from './event.service';
+import { v4 as uuidV4 } from 'uuid';
+import { EventWithOrg } from './types/event-with-org.type';
 
 @Injectable()
 export class DbService {
@@ -21,7 +23,7 @@ export class DbService {
   }): Promise<Event> {
     try {
       const dbResult = await this.prismaService.events.create({
-        data: payload,
+        data: { ...payload, uuid: uuidV4() },
         include: {
           organization: true,
         },
@@ -39,7 +41,7 @@ export class DbService {
     }
   }
 
-  async findAll(organizationId?: string): Promise<Event[]> {
+  async findAll(organizationId?: string): Promise<EventWithOrg[]> {
     try {
       const where = organizationId ? { organizationId } : {};
 
@@ -57,7 +59,7 @@ export class DbService {
     }
   }
 
-  async findOne(id: string): Promise<Event | null> {
+  async findOne(id: string): Promise<EventWithOrg | null> {
     try {
       const dbResult = await this.prismaService.events.findUnique({
         where: { id },

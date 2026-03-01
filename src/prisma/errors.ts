@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
 
 export const CONSTRAINT_FAILED = 'P2002';
 export const NOT_FOUND = 'P2025';

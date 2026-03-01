@@ -15,6 +15,8 @@ import { DeleteEventInput } from './dto/delete-event.input';
 import { CacheService } from '../cache/cache.service';
 import { CACHE_KEYS } from '../cache/cache_keys';
 import { minutesToSeconds } from 'date-fns';
+import { Events, Organizations } from '@prisma/client';
+import { EventWithOrg } from './types/event-with-org.type';
 
 export type ValidatedEvent = UpdateEventInput &
   (Required<Pick<UpdateEventInput, 'name'>> | Required<Pick<UpdateEventInput, 'capacity'>>);
@@ -27,15 +29,15 @@ export class EventService {
     private readonly cacheService: CacheService,
   ) {}
 
-  private async getOrganizationByUuid(uuid: string): Promise<Organization> {
+  private async getOrganizationByUuid(uuid: string): Promise<Organizations> {
     const cacheKey = CACHE_KEYS.organization(uuid);
-    const cacheData = await this.cacheService.get<Organization>(cacheKey);
+    const cacheData = await this.cacheService.get<Organizations>(cacheKey);
 
     if (cacheData) {
       return cacheData;
     }
 
-    const organization = await this.organizationService.getByUuid(uuid);
+    const organization = await this.organizationService.getByUuid(uuid, false);
 
     if (!organization) {
       throw new BadRequestException('organization_not_found');
@@ -118,8 +120,8 @@ export class EventService {
     });
   }
 
-  private checkOwnership(event: Event, organization: Organization): void {
-    if (event.organization.id !== organization.id) {
+  private checkOwnership(event: EventWithOrg, organization: Organization): void {
+    if (event.organization.uuid !== organization.uuid) {
       throw new UnauthorizedException('unauthorized');
     }
   }

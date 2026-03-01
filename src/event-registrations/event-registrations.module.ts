@@ -9,4 +9,3 @@ import { OrganizationModule } from '../organization/organization.module';
   providers: [EventRegistrationsService, DbService, EventRegistrationsResolver],
 })
 export class EventRegistrationsModule {}
-

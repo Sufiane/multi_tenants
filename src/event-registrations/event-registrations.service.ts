@@ -49,9 +49,11 @@ export class EventRegistrationsService {
   }
 
   private ensureSameOrganization(user: User, event: Event, organization: Organization): void {
-    if (user.organization.id !== organization.id || event.organization.id !== organization.id) {
+    if (
+      user.organization.uuid !== organization.uuid ||
+      event.organization.uuid !== organization.uuid
+    ) {
       throw new UnauthorizedException('unauthorized');
     }
   }
 }
-

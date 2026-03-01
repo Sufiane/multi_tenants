@@ -4,7 +4,7 @@ import { Organization } from '../../organization/object-type/organization.type';
 @ObjectType()
 export class Event {
   @Field()
-  id: string;
+  uuid: string;
 
   @Field()
   name: string;

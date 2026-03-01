@@ -5,9 +5,6 @@ import { Event } from '../../event/object-type/event.type';
 @ObjectType()
 export class EventRegistration {
   @Field()
-  id: string;
-
-  @Field()
   createdAt: Date;
 
   @Field()
@@ -16,4 +13,3 @@ export class EventRegistration {
   @Field()
   event: Event;
 }
-

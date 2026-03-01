@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { PrismaService } from '../prisma/prisma.service';
 import { isConstraintFailedError } from '../prisma/errors';
 import { User } from './object-type/user.type';
+import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class DbService {
@@ -10,7 +11,7 @@ export class DbService {
   async create(payload: { name: string; email: string; organizationId: string }): Promise<User> {
     try {
       const dbResult = await this.prismaService.users.create({
-        data: payload,
+        data: { ...payload, uuid: uuidV4() },
         include: {
           organization: true,
         },

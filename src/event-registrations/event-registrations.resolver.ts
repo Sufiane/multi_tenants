@@ -15,4 +15,3 @@ export class EventRegistrationsResolver {
     return this.eventRegistrationsService.create(createEventRegistrationInput);
   }
 }
-

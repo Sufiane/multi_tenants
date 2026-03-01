@@ -18,4 +18,3 @@ export class CreateEventRegistrationInput {
   @IsString()
   organizationUuid: string;
 }
-
