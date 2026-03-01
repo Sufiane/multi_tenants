@@ -6,11 +6,10 @@ import { OrganizationModule } from './organization/organization.module';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { EventRegistrationsModule } from './event-registrations/event-registrations.module';
-import { CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
-    CacheModule.register(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       playground: false,
@@ -23,6 +22,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     UserModule,
     EventModule,
     EventRegistrationsModule,
+    CacheModule,
   ],
 })
 export class AppModule {}
