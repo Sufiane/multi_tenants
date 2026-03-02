@@ -1,31 +1,17 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateEventRegistrationInput } from './dto/create-event-registration.input';
 import { DbService } from './db.service';
-import { EventRegistration } from './object-type/event-registration.type';
-import { OrganizationService } from '../organization/organization.service';
-import { User } from '../user/object-type/user.type';
-import { Event } from '../event/object-type/event.type';
-import { Organization } from '../organization/object-type/organization.type';
+import { CancelEventRegistrationInput } from './dto/cancel-event-registration.intput';
+import { UserWithOrg } from './types/user-with-org.type';
+import { EventWithOrg } from './types/event-with-org.type';
+import { CancelledRegistration } from './object-type/cancelled-registration.type';
+import { CreatedRegistration } from './object-type/created-registration.type';
 
 @Injectable()
 export class EventRegistrationsService {
-  constructor(
-    private readonly dbService: DbService,
-    private readonly organizationService: OrganizationService,
-  ) {}
+  constructor(private readonly dbService: DbService) {}
 
-  async create(payload: CreateEventRegistrationInput): Promise<EventRegistration> {
-    const organization = await this.organizationService.getByUuid(payload.organizationUuid, false);
-
-    if (!organization) {
-      throw new BadRequestException('organization_not_found');
-    }
-
+  async create(payload: CreateEventRegistrationInput): Promise<CreatedRegistration> {
     const [user, event] = await Promise.all([
       this.dbService.findUserByUuid(payload.userUuid),
       this.dbService.findEventByUuid(payload.eventUuid),
@@ -39,21 +25,56 @@ export class EventRegistrationsService {
       throw new NotFoundException('event_not_found');
     }
 
-    this.ensureSameOrganization(user, event, organization);
+    this.ensureSameOrganization(user, event);
 
-    return this.dbService.createWithCapacity({
+    const dbResult = await this.dbService.createWithCapacity({
       userUuid: payload.userUuid,
       eventUuid: payload.eventUuid,
-      organizationId: organization.id,
+      organizationId: user.organizationId,
     });
+
+    return {
+      createdAt: dbResult.createdAt,
+      userUuid: payload.userUuid,
+      eventUuid: payload.eventUuid,
+    };
   }
 
-  private ensureSameOrganization(user: User, event: Event, organization: Organization): void {
-    if (
-      user.organization.uuid !== organization.uuid ||
-      event.organization.uuid !== organization.uuid
-    ) {
+  private ensureSameOrganization(user: UserWithOrg, event: EventWithOrg): void {
+    if (user.organizationId !== event.organizationId) {
       throw new UnauthorizedException('unauthorized');
     }
+  }
+
+  async cancel(payload: CancelEventRegistrationInput): Promise<CancelledRegistration> {
+    const userWithOrg = await this.dbService.findUserByUuid(payload.userUuid);
+
+    // Shouldn't be possible if we consider that user are authenticated
+    if (!userWithOrg) {
+      throw new NotFoundException('user_not_found');
+    }
+
+    const eventWithOrg = await this.dbService.findEventByUuid(payload.eventUuid);
+
+    if (!eventWithOrg) {
+      throw new NotFoundException('event_not_found');
+    }
+
+    this.ensureSameOrganization(userWithOrg, eventWithOrg);
+
+    const eventRegistration = await this.dbService.findEventRegistrationForUser({
+      userId: userWithOrg.id,
+      eventId: eventWithOrg.id,
+    });
+
+    if (!eventRegistration) {
+      throw new NotFoundException('registration_not_found');
+    }
+
+    return {
+      createdAt: eventRegistration.createdAt,
+      userUuid: userWithOrg.uuid,
+      eventUuid: eventWithOrg.uuid,
+    };
   }
 }

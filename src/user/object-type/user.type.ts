@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Organization } from '../../organization/object-type/organization.type';
+import { UserEventRegistrations } from './user-event-registrations.type';
 
 @ObjectType()
 export class User {
@@ -14,4 +15,7 @@ export class User {
 
   @Field()
   organization: Organization;
+
+  @Field(() => [UserEventRegistrations])
+  registrations: UserEventRegistrations[];
 }

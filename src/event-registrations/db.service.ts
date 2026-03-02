@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { isConstraintFailedError } from '../prisma/errors';
-import { EventRegistration } from './object-type/event-registration.type';
-import { User } from '../user/object-type/user.type';
-import { Event } from '../event/object-type/event.type';
+import { Registrations } from '@prisma/client';
+import { EventWithOrg } from './types/event-with-org.type';
+import { UserWithOrg } from './types/user-with-org.type';
 
 @Injectable()
 export class DbService {
@@ -16,7 +16,7 @@ export class DbService {
 
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findUserByUuid(uuid: string): Promise<User | null> {
+  async findUserByUuid(uuid: string): Promise<UserWithOrg | null> {
     try {
       return await this.prismaService.users.findUnique({
         where: { uuid },
@@ -34,7 +34,7 @@ export class DbService {
     }
   }
 
-  async findEventByUuid(uuid: string): Promise<Event | null> {
+  async findEventByUuid(uuid: string): Promise<EventWithOrg | null> {
     try {
       return await this.prismaService.events.findUnique({
         where: { uuid },
@@ -56,7 +56,7 @@ export class DbService {
     userUuid: string;
     eventUuid: string;
     organizationId: string;
-  }): Promise<EventRegistration> {
+  }): Promise<Registrations> {
     try {
       return await this.prismaService.$transaction(async tx => {
         const updated = await tx.events.updateMany({
@@ -115,6 +115,29 @@ export class DbService {
       }
 
       this.logger.error('Error creating event-registration', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        payload,
+      });
+
+      throw new InternalServerErrorException('internal_error');
+    }
+  }
+
+  async findEventRegistrationForUser(payload: {
+    userId: string;
+    eventId: string;
+  }): Promise<Registrations | null> {
+    try {
+      return await this.prismaService.registrations.findUnique({
+        where: {
+          userId_eventId: {
+            userId: payload.userId,
+            eventId: payload.eventId,
+          },
+        },
+      });
+    } catch (e) {
+      this.logger.error('Error finding event-registration for user', {
         error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
         payload,
       });

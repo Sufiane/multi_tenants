@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { isConstraintFailedError } from '../prisma/errors';
-import { User } from './object-type/user.type';
 import { v4 as uuidV4 } from 'uuid';
+import { FullUser } from './types/full-user.type';
+import { UserWithOrg } from './types/user-with-org.type';
 
 @Injectable()
 export class DbService {
@@ -15,7 +16,11 @@ export class DbService {
 
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(payload: { name: string; email: string; organizationId: string }): Promise<User> {
+  async create(payload: {
+    name: string;
+    email: string;
+    organizationId: string;
+  }): Promise<UserWithOrg> {
     try {
       const dbResult = await this.prismaService.users.create({
         data: { ...payload, uuid: uuidV4() },
@@ -38,6 +43,31 @@ export class DbService {
       this.logger.error('Error creating user', {
         error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
         payload,
+      });
+
+      throw new InternalServerErrorException('internal_error');
+    }
+  }
+
+  async findByUuid(uuid: string): Promise<FullUser | null> {
+    try {
+      return await this.prismaService.users.findUnique({
+        include: {
+          organization: true,
+          registrations: {
+            include: {
+              event: true,
+            },
+          },
+        },
+        where: {
+          uuid,
+        },
+      });
+    } catch (e) {
+      this.logger.error('Error finding user', {
+        error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        uuid,
       });
 
       throw new InternalServerErrorException('internal_error');

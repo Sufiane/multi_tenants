@@ -3,7 +3,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { DbService } from './db.service';
 import { User } from './object-type/user.type';
 import { OrganizationService } from '../organization/organization.service';
-import { pick } from 'radash';
+import { omit, pick } from 'radash';
 
 @Injectable()
 export class UserService {
@@ -19,9 +19,31 @@ export class UserService {
       throw new BadRequestException('organization_not_found');
     }
 
-    return this.dbService.create({
+    const dbResult = await this.dbService.create({
       organizationId: organization.id,
       ...pick(payload, ['name', 'email']),
     });
+
+    return {
+      ...omit(dbResult, ['organizationId']),
+      registrations: [],
+      organization: dbResult.organization,
+    };
+  }
+
+  async find(uuid: string): Promise<User> {
+    const user = await this.dbService.findByUuid(uuid);
+
+    if (!user) {
+      throw new BadRequestException('user_not_found');
+    }
+
+    return {
+      ...omit(user, ['organizationId', 'registrations']),
+      registrations: user.registrations.map(registration => ({
+        name: registration.event.name,
+        createdAt: registration.createdAt,
+      })),
+    };
   }
 }
