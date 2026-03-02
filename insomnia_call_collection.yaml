@@ -1,0 +1,310 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Multi tenants
+meta:
+  id: wrk_e5348eb5ba294b459e5ed109a122e7d0
+  created: 1772295540880
+  modified: 1772295540880
+  description: ""
+collection:
+  - name: organizations
+    meta:
+      id: fld_a80e13fe674d494190f6f6da89ef1fbe
+      created: 1772295554428
+      modified: 1772295554428
+      sortKey: -1772295554428
+      description: ""
+    children:
+      - url: localhost:3000/graphql
+        name: get all
+        meta:
+          id: req_0098968e1bb94b8fa25794bdca215106
+          created: 1772295558796
+          modified: 1772456285961
+          isPrivate: false
+          description: ""
+          sortKey: -1772295558796
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"{\n\torganizations {\n\t\tname\n\t\tuuid\n\t}\n}"}'
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: localhost:3000/graphql
+        name: create
+        meta:
+          id: req_bd347e958caf4a8980c4b32c60b81188
+          created: 1772299489149
+          modified: 1772299653649
+          isPrivate: false
+          description: ""
+          sortKey: -1772299489149
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"mutation creatOrganization($input: CreateOrganizationInput!)
+            {\n\tcreateOrganization(createOrganizationInput: $input)
+            {\n\t\tname\n\t\tuuid\n\t}\n}","operationName":"creatOrganization","variables":"{\n\t\"input\":
+            {\n\t\t\"name\": \"test_orga\"\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: users
+    meta:
+      id: fld_dff0acd6101e49fc91c7e3a8d12d61ff
+      created: 1772297768237
+      modified: 1772297768237
+      sortKey: -1772297768237
+      description: ""
+    children:
+      - url: localhost:3000/graphql
+        name: create
+        meta:
+          id: req_0284124a8bf14c3096d2a56c40fd758b
+          created: 1772297770672
+          modified: 1772459782527
+          isPrivate: false
+          description: ""
+          sortKey: -1772297770672
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"mutation createUser($input:
+            CreateUserInput!){\n\tcreateUser(createUserInput: $input)
+            {\n\t\temail\n\t\tname\n\t\torganization
+            {\n\t\t\tuuid\n\t\t}\n\t}\n}","operationName":"createUser","variables":"{\n\t\"input\":
+            {\n\t\t\"email\": \"test3@email.com\",\n\t\t\"name\":
+            \"test3\",\n\t\t\"organizationUuid\":
+            \"a85fea43-3618-4292-94c8-b6e1cbfbe835\"\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: localhost:3000/graphql
+        name: get one
+        meta:
+          id: req_415ec873a36b4feaa7176ca31c38e867
+          created: 1772456065233
+          modified: 1772459836856
+          isPrivate: false
+          description: ""
+          sortKey: -1772297770772
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"{\n  getUser(uuid: \"1d9bf986-62e5-44d0-a697-9664415024e0\")
+            {\n    email\n    name\n    organization
+            {\n      name\n      uuid\n    }\n    registrations
+            {\n      createdAt\n      name\n    }\n  }\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: events
+    meta:
+      id: fld_c460b4e9bcf94877b67ccfeb2dfb69dc
+      created: 1772455833911
+      modified: 1772455833911
+      sortKey: -1772455833911
+      description: ""
+    children:
+      - url: localhost:3000/graphql
+        name: get events (by org)
+        meta:
+          id: req_ba90950fa686478391d93a38927125a0
+          created: 1772455836838
+          modified: 1772459566652
+          isPrivate: false
+          description: ""
+          sortKey: -1772455836838
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"{\n\tevents(organizationUuid:
+            \"a85fea43-3618-4292-94c8-b6e1cbfbe835\")
+            {\n\t\tcapacity\n\t\tname\n\t\tremainingCapacity\n\t\tuuid\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: localhost:3000/graphql
+        name: create
+        meta:
+          id: req_ac5631aec6e748e09f0dedc607aa22a6
+          created: 1772459407049
+          modified: 1772459529993
+          isPrivate: false
+          description: ""
+          sortKey: -1772459407049
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"mutation createEvent($input: CreateEventInput!)
+            {\n\tcreateEvent(createEventInput:
+            $input){\n\t\tcapacity\n\t\tname\n\t\tuuid\n\t\tremainingCapacity\n\t\torganization
+            {\n\t\t\tuuid\n\t\t}\n\t}\n}","operationName":"createEvent","variables":"{\n\t\"input\":
+            {\n\t\t\"name\": \"test_event_new\",\n\t\t\"capacity\":
+            1,\n\t\t\"organizationUuid\":
+            \"a85fea43-3618-4292-94c8-b6e1cbfbe835\"\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: registrations
+    meta:
+      id: fld_9aedd09c2bfe4aa08ca49113e5a833a8
+      created: 1772456234662
+      modified: 1772456234662
+      sortKey: -1772456234662
+      description: ""
+    children:
+      - url: localhost:3000/graphql
+        name: cancel
+        meta:
+          id: req_975cedce4d43403e857ba328a21947a1
+          created: 1772456242446
+          modified: 1772457285490
+          isPrivate: false
+          description: ""
+          sortKey: -1772456242446
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"mutation cancelRegistration($input:
+            CancelEventRegistrationInput!)
+            {\n\tcancelEventRegistration(cancelEventRegistrationInput: $input)
+            {\n\t\tcreatedAt\n\t\teventUuid\n\t\tuserUuid\n\t}\n}","operationName":"cancelRegistration","variables":"{\n\t\"input\":
+            {\n\t\t\"userUuid\":
+            \"85842442-7420-4a80-a609-ce60be135cce\",\n\t\t\"eventUuid\":
+            \"a2bfc8a7-1ff6-4cff-bf1a-941237d3e7a0\"\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: localhost:3000/graphql
+        name: create
+        meta:
+          id: req_0123cec7ac7a428d9c775e906d610e3d
+          created: 1772458786248
+          modified: 1772459812437
+          isPrivate: false
+          description: ""
+          sortKey: -1772458786248
+        method: POST
+        body:
+          mimeType: application/graphql
+          text: '{"query":"mutation createEventRegistration($input:
+            CreateEventRegistrationInput!)
+            {\n\tcreateEventRegistration(createEventRegistrationInput: $input)
+            {\n\t\tcreatedAt\n\t\tuserUuid\n\t\teventUuid\n\t}\n}","operationName":"createEventRegistration","variables":"{\n\t\"input\":
+            {\n\t\t\"userUuid\":
+            \"1d9bf986-62e5-44d0-a697-9664415024e0\",\n\t\t\"eventUuid\":
+            \"56eee5a4-d75e-4cf6-a980-e46454c89429\"\n\t}\n}"}'
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_5a7ff851156d4d372bad9bb8a0adbeb955e6023c
+    created: 1772295540887
+    modified: 1772295540887
+environments:
+  name: Base Environment
+  meta:
+    id: env_5a7ff851156d4d372bad9bb8a0adbeb955e6023c
+    created: 1772295540885
+    modified: 1772295540885
+    isPrivate: false
