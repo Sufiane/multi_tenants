@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { v4 as uuidV4 } from 'uuid';
+
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -8,7 +8,7 @@ async function main(): Promise<void> {
   const org1 = await prisma.organizations.create({
     data: {
       name: 'Organization 1',
-      uuid: uuidV4(),
+      uuid: 'ecdd4d74-cd32-4c78-a5e9-5ee1714f2a55',
     },
   });
 
@@ -16,7 +16,7 @@ async function main(): Promise<void> {
     data: {
       name: 'User 1',
       email: 'user@email.com',
-      uuid: uuidV4(),
+      uuid: '85842442-7420-4a80-a609-ce60be135cce',
       organizationId: org1.id,
     },
   });
@@ -26,7 +26,7 @@ async function main(): Promise<void> {
       name: 'Event 1',
       capacity: 10,
       remainingCapacity: 10,
-      uuid: uuidV4(),
+      uuid: 'a2bfc8a7-1ff6-4cff-bf1a-941237d3e7a0',
       organizationId: org1.id,
     },
   });
