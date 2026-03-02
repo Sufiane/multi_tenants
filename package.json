@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
     "generate:changelog": "npx conventional-changelog -p angular",
-    "prisma:seed": "ts-node src/prisma/seed.ts"
+    "prisma:seed": "ts-node src/prisma/seed.ts",
+    "postinstall": "npm run prisma:seed"
   },
   "prisma": {
     "seed": "ts-node src/prisma/seed.ts"

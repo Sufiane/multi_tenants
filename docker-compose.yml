@@ -1,0 +1,168 @@
+services:
+  mongodb:
+    image: mongo:4.4.29
+    container_name: multi-tenants-mongodb
+    hostname: mongodb
+    restart: always
+    user: root
+    command: |
+      bash -c "
+      cp /tmp/mongo-keyfile /etc/mongodb-keyfile
+      chmod 600 /etc/mongodb-keyfile
+      chown 999:999 /etc/mongodb-keyfile
+      exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /etc/mongodb-keyfile --bind_ip_all
+      "
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: multi_tenants
+    healthcheck:
+      test: |
+        mongo --quiet --eval "db.adminCommand('ping').ok" || 
+        mongo -u admin -p password --authenticationDatabase admin --quiet --eval "db.adminCommand('ping').ok"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-keyfile:/tmp/mongo-keyfile
+    networks:
+      - multi-tenants-network
+
+  mongo-init:
+    image: mongo:4.4.29
+    container_name: multi-tenants-mongodb-init
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - multi-tenants-network
+    command: |
+      bash -c "
+      echo 'Waiting for MongoDB to be reachable...'
+      sleep 10
+
+      echo 'Attempting Replica Set initiation...'
+      # Try initiating WITHOUT auth first (standard for first-time setup or if RS is uninitialized)
+      mongo --host mongodb:27017 --eval \"
+        try {
+          rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongodb:27017'}]});
+          print('Replica Set initiated successfully (no auth)');
+        } catch (e) {
+          print('Initiate without auth failed (possibly already initialized or auth required): ' + e.message);
+        }
+      \"
+
+      # Then try WITH auth (if already initialized or if we missed the window)
+      mongo --host mongodb:27017 -u admin -p password --authenticationDatabase admin --eval \"
+        try {
+          var status = rs.status();
+          if (status.ok) {
+            print('Replica Set already initialized');
+          } else {
+            rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongodb:27017'}]});
+            print('Replica Set initiated successfully (with auth)');
+          }
+        } catch (e) {
+          if (e.message.indexOf('already initialized') !== -1) {
+            print('Replica Set already initialized (from catch)');
+          } else {
+            print('Initiate with auth failed: ' + e.message);
+          }
+        }
+      \"
+
+      echo 'Waiting for PRIMARY status...'
+      until mongo --host mongodb:27017 --quiet --eval \"rs.isMaster().ismaster\" | grep -q 'true' || \
+            mongo --host mongodb:27017 -u admin -p password --authenticationDatabase admin --quiet --eval \"rs.isMaster().ismaster\" | grep -q 'true'; do
+        echo 'Still waiting for node to be PRIMARY...'
+        sleep 2
+      done
+      echo 'Replica Set is ready (PRIMARY elected)!'
+      "
+
+  app:
+    image: node:24-alpine
+    container_name: multi-tenants-app
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install && npx prisma generate && npm run start:dev"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mongodb://admin:password@mongodb:27017/multi_tenants?authSource=admin&replicaSet=rs0
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - multi-tenants-network
+
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: multi-tenants:dev
+    container_name: multi-tenants-app-dev
+    restart: unless-stopped
+    command: >
+      sh -c "
+      echo 'Waiting for MongoDB to be fully Primary...';
+      sleep 5;
+      npx prisma generate --schema src/prisma/schema.prisma && 
+      echo 'Starting Seed...';
+      npx prisma db seed && 
+      echo 'Seed done, starting App...';
+      npm run start:dev
+      "
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mongodb://admin:password@mongodb:27017/multi_tenants?authSource=admin&replicaSet=rs0&directConnection=false
+    ports:
+      - "3002:3000"
+    volumes:
+      - .:/app
+      - app_dev_node_modules:/app/node_modules
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - multi-tenants-network
+
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: multi-tenants:prod
+    container_name: multi-tenants-app-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mongodb://admin:password@mongodb:27017/multi_tenants?authSource=admin&replicaSet=rs0
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - multi-tenants-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  app_dev_node_modules:
+    driver: local
+
+networks:
+  multi-tenants-network:
+    driver: bridge
